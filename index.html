@@ -1,769 +1,1367 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Учет ТМЦ Минск Щомыслицкий · вход</title>
-  <style>
-    /* === СКЛАДСКАЯ ТЕМА С ШУТКАМИ === */
-    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Roboto, system-ui, sans-serif; }
-    body {
-      min-height: 100vh;
-      background: linear-gradient(145deg, #c0c0c0 0%, #a0a0a0 30%, #808080 100%);
-      background-attachment: fixed;
-      display: flex; align-items: center; justify-content: center; padding: 1rem; position: relative; overflow-x: hidden;
-    }
-    body::before {
-      content: "📦📦📦"; position: absolute; top: 20px; left: 20px; font-size: 5rem; opacity: 0.1; transform: rotate(-5deg);
-      white-space: nowrap; pointer-events: none; z-index: 0;
-    }
-    body::after {
-      content: "🚚 КЛАДОВЩИК-ПРИКОЛИСТ 🚚"; position: absolute; bottom: 20px; right: 20px; font-size: 2rem; opacity: 0.1; pointer-events: none; z-index: 0;
-      white-space: nowrap; color: #2c3e50; font-weight: bold;
-    }
-
-    /* стили для контейнера входа и самого приложения */
-    #login-container {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: rgba(0,0,0,0.7);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 10000;
-      backdrop-filter: blur(5px);
-    }
-    .login-box {
-      background: #ecf0f1;
-      padding: 2.5rem 2rem;
-      border-radius: 2rem;
-      box-shadow: 0 25px 40px rgba(0,0,0,0.5), 0 0 0 4px #f1c40f;
-      text-align: center;
-      max-width: 400px;
-      width: 90%;
-    }
-    .login-box h2 {
-      color: #2c3e50;
-      font-size: 2rem;
-      margin-bottom: 1.5rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.5rem;
-    }
-    .login-box input {
-      width: 100%;
-      padding: 1rem 1.5rem;
-      margin: 0.7rem 0;
-      border: 3px solid #bdc3c7;
-      border-radius: 3rem;
-      font-size: 1.1rem;
-      outline: none;
-    }
-    .login-box input:focus {
-      border-color: #e67e22;
-    }
-    .login-box .btn {
-      background: #e67e22;
-      border: none;
-      padding: 1rem 2rem;
-      border-radius: 3rem;
-      font-size: 1.2rem;
-      font-weight: 600;
-      color: white;
-      box-shadow: 0 6px 0 #b45f1b;
-      cursor: pointer;
-      transition: 0.1s;
-      margin-top: 1rem;
-      width: 100%;
-    }
-    .login-box .btn:hover {
-      background: #f39c12;
-      transform: translateY(-2px);
-      box-shadow: 0 8px 0 #b45f1b;
-    }
-    .login-box .btn:active {
-      transform: translateY(4px);
-      box-shadow: 0 2px 0 #b45f1b;
-    }
-    .login-hint {
-      margin-top: 1rem;
-      color: #7f8c8d;
-      font-size: 0.9rem;
-    }
-
-    #app-container {
-      display: none; /* скрыто до входа */
-      width: 100%;
-      max-width: 1300px;
-      margin: 0 auto;
-    }
-
-    /* Остальные стили (такие же, как в последней версии) */
-    .card {
-      background: rgba(220, 220, 220, 0.85); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-      border-radius: 2rem; box-shadow: 0 20px 35px -10px rgba(0,0,0,0.5), inset 0 2px 8px rgba(255, 255, 200, 0.6);
-      padding: 2rem; border: 4px solid #ffcc00; position: relative; z-index: 2;
-    }
-    h1 {
-      font-size: 2.6rem; font-weight: 700; background: linear-gradient(135deg, #2c3e50, #e67e22);
-      -webkit-background-clip: text; background-clip: text; color: transparent; display: flex; align-items: center; gap: 0.8rem;
-      margin-bottom: 1.2rem; text-shadow: 2px 4px 8px rgba(0,0,0,0.3); letter-spacing: -0.02em;
-    }
-    h1 span { font-size: 3rem; filter: drop-shadow(4px 6px 0 rgba(0,0,0,0.2)); }
-    .tabs {
-      display: flex; flex-wrap: wrap; gap: 0.8rem; margin-bottom: 2rem; border-bottom: 4px solid #e67e22; padding-bottom: 0.5rem;
-    }
-    .tab-btn {
-      background: #ecf0f1; border: 2px solid #bdc3c7; padding: 0.9rem 1.8rem; font-size: 1.2rem; font-weight: 600;
-      border-radius: 2rem 2rem 0 0; color: #2c3e50; cursor: pointer; transition: all 0.2s; display: flex; align-items: center;
-      gap: 0.6rem; box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
-    }
-    .tab-btn:hover { background: #f39c12; color: white; border-color: #e67e22; transform: translateY(-3px); }
-    .tab-btn.active { background: #e67e22; border-color: #d35400; color: white; box-shadow: 0 5px 0 #b94e00; }
-    .tab-pane { display: none; opacity: 0; transition: opacity 0.3s; min-height: 400px; }
-    .tab-pane.active { display: block; opacity: 1; }
-    .form-row { margin-bottom: 1.8rem; display: flex; flex-wrap: wrap; align-items: center; gap: 1rem; }
-    label { font-size: 1.1rem; font-weight: 600; color: #2c3e50; min-width: 140px; }
-    select, input, textarea {
-      padding: 1rem 1.5rem; font-size: 1.1rem; background: white; border: 3px solid #bdc3c7; border-radius: 3rem;
-      outline: none; color: #2c3e50; transition: 0.2s; box-shadow: inset 0 2px 5px rgba(0,0,0,0.1); flex: 1 1 300px;
-    }
-    select { cursor: pointer; background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="%23e67e22" stroke-width="3"><polyline points="6 9 12 15 18 9"/></svg>'); background-repeat: no-repeat; background-position: right 1.5rem center; background-size: 1.2rem; }
-    input:focus, select:focus, textarea:focus { border-color: #e67e22; }
-    .btn {
-      background: #e67e22; border: none; padding: 1rem 2.2rem; border-radius: 4rem; font-size: 1.2rem; font-weight: 600;
-      display: inline-flex; align-items: center; gap: 0.7rem; box-shadow: 0 8px 0 #b45f1b, 0 5px 15px rgba(0,0,0,0.3);
-      cursor: pointer; transition: 0.1s; color: white; border: 2px solid #f39c12;
-    }
-    .btn:hover { background: #f39c12; transform: translateY(-3px); box-shadow: 0 10px 0 #b45f1b; }
-    .btn:active { transform: translateY(4px); box-shadow: 0 4px 0 #b45f1b; }
-    .btn.small { padding: 0.7rem 1.5rem; font-size: 1rem; }
-    .table-wrapper {
-      background: rgba(255, 255, 255, 0.7); border-radius: 2rem; padding: 1.5rem 1rem 1rem 1.5rem; overflow-x: auto;
-      margin-top: 1.2rem; border: 3px solid #bdc3c7; box-shadow: 0 8px 0 #7f8c8d;
-    }
-    table { width: 100%; border-collapse: collapse; }
-    th { color: white; background: #34495e; padding: 1rem; border-bottom: 3px solid #e67e22; }
-    td { padding: 0.8rem; border-bottom: 1px dashed #95a5a6; background: rgba(255,255,240,0.6); }
-    .badge { background: #e67e22; color: white; border-radius: 2rem; padding: 0.3rem 1.2rem; font-weight: 700; display: inline-block; }
-    .low-stock { background-color: #f1948a !important; }
-    .alert {
-      background: #fef9e7; border-radius: 2rem; padding: 1rem 2rem; margin: 1.2rem 0; border-left: 12px solid #f1c40f; color: #7d6608; box-shadow: 0 5px 0 #b7950b;
-    }
-    .alert.success { background: #d5f5e3; border-left-color: #2ecc71; color: #1d8348; }
-    .alert.error { background: #fadbd8; border-left-color: #e74c3c; color: #943126; }
-    .footer-buttons { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: space-between; align-items: center; margin-top: 2rem; }
-    .hotkey-hint { background: #34495e; color: white; border-radius: 2rem; padding: 0.3rem 1rem; font-size: 0.9rem; }
-    .joke { font-size: 1.2rem; color: #7f8c8d; margin-top: 1rem; text-align: center; }
-    .joke::before { content: "🧐 "; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WB Складской учёт ТМЦ (админка)</title>
+    <style>
+        /* Все стили без изменений (можно оставить как в предыдущей версии) */
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            background: linear-gradient(135deg, #f5f0ff 0%, #e6d9ff 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        #app {
+            width: 1400px;
+            max-width: 100%;
+            background-color: white;
+            border-radius: 30px;
+            box-shadow: 0 20px 40px rgba(98, 43, 143, 0.2);
+            overflow: hidden;
+            border: 1px solid #d9b3ff;
+        }
+        #login-screen {
+            background: white;
+            padding: 40px;
+            text-align: center;
+        }
+        .wb-logo {
+            font-size: 48px;
+            font-weight: 800;
+            color: #8b4ec7;
+            text-shadow: 2px 2px 0 #e0c3ff;
+            margin-bottom: 10px;
+        }
+        .wb-slogan {
+            font-size: 18px;
+            color: #a25ef0;
+            font-style: italic;
+            margin-bottom: 40px;
+            background: #f2e6ff;
+            display: inline-block;
+            padding: 8px 25px;
+            border-radius: 50px;
+        }
+        .login-form {
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        .login-form select, .login-form input {
+            width: 100%;
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 2px solid #d9b3ff;
+            border-radius: 15px;
+            font-size: 16px;
+            background-color: #faf5ff;
+        }
+        .login-form button {
+            background-color: #8b4ec7;
+            color: white;
+            border: none;
+            padding: 16px 40px;
+            border-radius: 40px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+            width: 100%;
+            margin-bottom: 15px;
+        }
+        .login-form button:hover {
+            background-color: #6b2fa7;
+            transform: scale(1.02);
+        }
+        .warehouse-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+        .warehouse-actions button {
+            background-color: #e0c3ff;
+            color: #4a2a6b;
+            padding: 12px 20px;
+            border-radius: 30px;
+            font-size: 14px;
+            border: none;
+            cursor: pointer;
+            flex: 1;
+        }
+        .warehouse-actions button:hover {
+            background-color: #c9a6ff;
+        }
+        #main-app {
+            display: none;
+            min-height: 600px;
+        }
+        .app-header {
+            background: #8b4ec7;
+            color: white;
+            padding: 20px 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .mini-logo {
+            font-size: 28px;
+            font-weight: bold;
+            background: white;
+            color: #8b4ec7;
+            padding: 5px 15px;
+            border-radius: 40px;
+        }
+        .current-warehouse {
+            background: #6b2fa7;
+            padding: 8px 25px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 18px;
+        }
+        .header-slogan {
+            font-style: italic;
+            font-size: 14px;
+            background: rgba(255,255,255,0.2);
+            padding: 5px 15px;
+            border-radius: 40px;
+            white-space: nowrap;
+        }
+        .notification-bell {
+            position: relative;
+            font-size: 24px;
+            cursor: pointer;
+            margin-right: 15px;
+        }
+        .notification-bell.has-new {
+            animation: shake 0.5s infinite;
+        }
+        @keyframes shake {
+            0% { transform: rotate(0deg); }
+            25% { transform: rotate(15deg); }
+            50% { transform: rotate(-15deg); }
+            75% { transform: rotate(5deg); }
+            100% { transform: rotate(0deg); }
+        }
+        .logout-btn {
+            background: white;
+            color: #8b4ec7;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 40px;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .logout-btn:hover {
+            background: #f0e0ff;
+        }
+        .tabs {
+            display: flex;
+            background: #f2e6ff;
+            padding: 10px 20px 0;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .tab {
+            padding: 12px 25px;
+            background: #e6d2ff;
+            border-radius: 30px 30px 0 0;
+            cursor: pointer;
+            font-weight: 600;
+            color: #4a2a6b;
+            transition: 0.1s;
+            border: none;
+            font-size: 16px;
+        }
+        .tab.active {
+            background: white;
+            color: #8b4ec7;
+            box-shadow: 0 -4px 8px rgba(139, 78, 199, 0.1);
+        }
+        .tab-content {
+            background: white;
+            padding: 30px;
+            border-radius: 0 20px 20px 20px;
+            min-height: 500px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+        }
+        th {
+            background: #8b4ec7;
+            color: white;
+            padding: 14px 10px;
+            font-weight: 600;
+            text-align: left;
+        }
+        td {
+            padding: 12px 10px;
+            border-bottom: 1px solid #f0e0ff;
+        }
+        tr:nth-child(even) {
+            background: #faf5ff;
+        }
+        tr:hover {
+            background: #f2e6ff;
+        }
+        .action-form {
+            background: #faf5ff;
+            padding: 25px;
+            border-radius: 25px;
+            margin-bottom: 30px;
+            border: 1px solid #d9b3ff;
+        }
+        .form-row {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            align-items: flex-end;
+            margin-bottom: 15px;
+        }
+        .form-group {
+            flex: 1 1 200px;
+        }
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            color: #4a2a6b;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #d9b3ff;
+            border-radius: 15px;
+            font-size: 15px;
+            background: white;
+        }
+        .btn {
+            background: #8b4ec7;
+            color: white;
+            border: none;
+            padding: 12px 28px;
+            border-radius: 40px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 16px;
+            transition: 0.2s;
+            border: 1px solid #8b4ec7;
+        }
+        .btn-secondary {
+            background: white;
+            color: #8b4ec7;
+        }
+        .btn-small {
+            padding: 6px 15px;
+            font-size: 14px;
+            border-radius: 20px;
+            margin: 0 4px;
+        }
+        .btn-danger {
+            background: #dc3545;
+            border-color: #dc3545;
+        }
+        .btn-danger:hover {
+            background: #bb2d3b;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(139, 78, 199, 0.3);
+        }
+        .flex-between {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .filter-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .message {
+            padding: 15px;
+            border-radius: 15px;
+            margin: 15px 0;
+            background: #e0c3ff;
+            color: #2d0f4b;
+        }
+        .error {
+            background: #ffcccc;
+            color: #a10000;
+        }
+        .success {
+            background: #c3e6cb;
+            color: #155724;
+        }
+        .table-container {
+            overflow-x: auto;
+        }
+        .totals-panel {
+            background: #f2e6ff;
+            padding: 20px;
+            border-radius: 20px;
+            margin-bottom: 20px;
+        }
+        .warehouse-selector {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #faf5ff;
+            border-radius: 20px;
+        }
+        .requests-panel {
+            background: #faf5ff;
+            padding: 20px;
+            border-radius: 20px;
+            margin-top: 20px;
+        }
+        .request-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #d9b3ff;
+        }
+        .request-item:last-child {
+            border-bottom: none;
+        }
+    </style>
 </head>
 <body>
-  <!-- КОНТЕЙНЕР ВХОДА (виден всегда сначала) -->
-  <div id="login-container">
-    <div class="login-box">
-      <h2><span>🔒</span> Вход в ТМЦ</h2>
-      <!-- Поля теперь пустые, пароль не предустановлен -->
-      <input type="text" id="username" placeholder="Имя пользователя" autocomplete="off">
-      <input type="password" id="password" placeholder="Пароль">
-      <button class="btn" id="loginBtn">Войти</button>
-      <div class="login-hint">🔐 подсказка: admin / tmc123</div>
+<div id="app">
+    <!-- Экран входа (без ссылки "Я снова всё забыл") -->
+    <div id="login-screen">
+        <div class="wb-logo">Wildberries</div>
+        <div class="wb-slogan">НАС КОРМИТ</div>
+        <div class="login-form">
+            <select id="warehouse-select" size="1"></select>
+            <input type="password" id="password-input" placeholder="Пароль">
+            <button id="login-btn">Войти на склад</button>
+            <div class="warehouse-actions">
+                <button id="add-warehouse-btn">➕ Добавить склад</button>
+                <button id="remove-warehouse-btn">➖ Удалить склад</button>
+            </div>
+        </div>
     </div>
-  </div>
 
-  <!-- ОСНОВНОЕ ПРИЛОЖЕНИЕ (скрыто до входа) -->
-  <div id="app-container">
-    <div class="card">
-      <h1><span>📦🤣</span> Учет ТМЦ Минск Щомыслицкий <span>😂📦</span></h1>
-      <div class="joke">Склад — место, где даже пыль числится на балансе!</div>
+    <!-- Основное приложение -->
+    <div id="main-app">
+        <div class="app-header">
+            <div class="header-left">
+                <span class="mini-logo">WB</span>
+                <span class="current-warehouse" id="current-warehouse-label"></span>
+                <span class="header-slogan">Склад — место, где даже пыль числится на балансе!</span>
+            </div>
+            <div style="display: flex; align-items: center;">
+                <span id="notification-bell" class="notification-bell" title="Новые заявки">🔔</span>
+                <button class="logout-btn" id="logout-btn">🚪 Выйти</button>
+            </div>
+        </div>
 
-      <!-- Вкладки -->
-      <div class="tabs" id="tabHeaders">
-        <button class="tab-btn active" data-tab="income">➕ Принять</button>
-        <button class="tab-btn" data-tab="outcome">➖ Выдать</button>
-        <button class="tab-btn" data-tab="stock">📊 Остатки</button>
-        <button class="tab-btn" data-tab="report">📅 Расход</button>
-        <button class="tab-btn" data-tab="catalog">📋 Каталог</button>
-        <button class="tab-btn" data-tab="analytics">🏆 Топ‑10</button>
-        <button class="tab-btn" id="helpBtn">❓</button>
-      </div>
+        <div class="tabs" id="tabs-container">
+            <button class="tab active" data-tab="catalog">📦 Справочник</button>
+            <button class="tab" data-tab="receipt">📥 Приход</button>
+            <button class="tab" data-tab="dispatch">📤 Расход</button>
+            <button class="tab" data-tab="inventory">🔍 Инвентаризация</button>
+            <button class="tab" data-tab="history">📜 История</button>
+            <button class="tab" data-tab="balances">📊 Остатки</button>
+            <!-- Вкладка "Заявки" будет видна только админу (будет добавлена динамически) -->
+        </div>
 
-      <!-- ПРИНЯТЬ -->
-      <div id="tab-income" class="tab-pane active">
-        <div class="form-row search-box">
-          <label>🔍 Искать товар:</label>
-          <input type="text" id="incomeSearch" placeholder="например, степлер...">
-        </div>
-        <div class="form-row">
-          <label>📦 Товар:</label>
-          <select id="incomeSelect"></select>
-        </div>
-        <div class="form-row">
-          <label>🔢 Количество:</label>
-          <input type="number" id="incomeQty" min="1" value="1" step="1">
-        </div>
-        <div class="form-row">
-          <label>📝 Комментарий:</label>
-          <textarea id="incomeComment" placeholder="откуда пришло?"></textarea>
-        </div>
-        <div class="btn-group">
-          <button class="btn" id="incomeBtn"><span>📥</span> Принять</button>
-          <button class="btn small" id="addNewFromIncome">➕ Новый</button>
-          <button class="btn small" id="delSelectedFromIncome">🗑️ Удалить</button>
-        </div>
-        <div id="incomeMessage" class="alert" style="display: none;"></div>
-      </div>
-
-      <!-- ВЫДАТЬ -->
-      <div id="tab-outcome" class="tab-pane">
-        <div class="form-row search-box">
-          <label>🔍 Искать товар:</label>
-          <input type="text" id="outcomeSearch" placeholder="что берём?">
-        </div>
-        <div class="form-row">
-          <label>📦 Товар:</label>
-          <select id="outcomeSelect"></select>
-        </div>
-        <div class="form-row">
-          <label>🔢 Количество:</label>
-          <input type="number" id="outcomeQty" min="1" value="1" step="1">
-        </div>
-        <div class="form-row">
-          <label>📝 Комментарий:</label>
-          <textarea id="outcomeComment" placeholder="кому выдано?"></textarea>
-        </div>
-        <div class="btn-group">
-          <button class="btn" id="outcomeBtn"><span>📤</span> Выдать</button>
-          <button class="btn small" id="addNewFromOutcome">➕ Новый</button>
-          <button class="btn small" id="delSelectedFromOutcome">🗑️ Удалить</button>
-        </div>
-        <div id="outcomeMessage" class="alert" style="display: none;"></div>
-      </div>
-
-      <!-- ОСТАТКИ -->
-      <div id="tab-stock" class="tab-pane">
-        <div style="display: flex; gap: 1rem; margin-bottom: 1rem; align-items: center;">
-          <button class="btn small" id="exportExcelBtn"><span>📊</span> Экспорт в Excel</button>
-          <span class="hotkey-hint">остаток < 10 — красный</span>
-        </div>
-        <div class="table-wrapper">
-          <table id="stockTable">
-            <thead><tr><th>Наименование</th><th>Остаток</th></tr></thead>
-            <tbody id="stockBody"></tbody>
-          </table>
-        </div>
-        <button class="btn" id="refreshStockBtn"><span>🔄</span> Обновить</button>
-      </div>
-
-      <!-- РАСХОД ЗА ПЕРИОД -->
-      <div id="tab-report" class="tab-pane">
-        <div style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: flex-end; margin-bottom: 1.5rem;">
-          <div><label>📅 с</label><input type="date" id="dateFrom"></div>
-          <div><label>📅 по</label><input type="date" id="dateTo"></div>
-          <button class="btn" id="reportBtn"><span>🔍</span> Показать</button>
-        </div>
-        <div id="reportSummary" style="background:#ffe5b4;padding:1rem 2rem;border-radius:3rem;font-weight:bold;"></div>
-        <div class="table-wrapper">
-          <table id="reportTable"><thead><tr><th>Дата</th><th>ТМЦ</th><th>Кол-во</th><th>Комментарий</th></tr></thead><tbody id="reportBody"></tbody></table>
-        </div>
-      </div>
-
-      <!-- КАТАЛОГ -->
-      <div id="tab-catalog" class="tab-pane">
-        <div class="add-catalog-form">
-          <input type="text" id="newCatalogName" placeholder="Введите новое наименование" style="flex:2;">
-          <button class="btn" id="addCatalogBtn"><span>➕</span> Добавить</button>
-        </div>
-        <div class="table-wrapper">
-          <table id="catalogTable">
-            <thead><tr><th>Наименование</th><th>Действие</th></tr></thead>
-            <tbody id="catalogBody"></tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- АНАЛИТИКА (ТОП-10) -->
-      <div id="tab-analytics" class="tab-pane">
-        <h2 style="color:#2c3e50;">🏆 Топ‑10 самых расходуемых товаров</h2>
-        <div class="table-wrapper">
-          <table id="topTable">
-            <thead><tr><th>#</th><th>Товар</th><th>Всего выдано</th><th>Кол-во операций</th></tr></thead>
-            <tbody id="topBody"></tbody>
-          </table>
-        </div>
-      </div>
-
-      <hr>
-      <div class="footer-buttons">
-        <span class="hotkey-hint">⚡ Ctrl+Shift+1..6 — вкладки</span>
-        <div style="display: flex; gap: 1rem;">
-          <button class="btn" id="exportDataBtn"><span>💾</span> Экспорт JSON</button>
-          <input type="file" id="importFile" accept=".json,application/json" style="display:none;">
-          <button class="btn" id="importDataBtn"><span>📂</span> Импорт JSON</button>
-          <button class="btn" id="resetAllBtn"><span>🔄</span> Сброс к демо</button>
-        </div>
-      </div>
-      <div class="joke">* Горячие клавиши работают только когда не в поле ввода</div>
+        <div class="tab-content" id="tab-content"></div>
     </div>
-  </div>
+</div>
 
-  <script>
+<script>
     (function() {
-      // ========== ЛОГИКА ВХОДА ==========
-      const loginContainer = document.getElementById('login-container');
-      const appContainer = document.getElementById('app-container');
-      const loginBtn = document.getElementById('loginBtn');
-      const usernameInput = document.getElementById('username');
-      const passwordInput = document.getElementById('password');
+        // ---------- Ключи для localStorage ----------
+        const STORAGE_WAREHOUSES = 'wb_warehouses';
+        const STORAGE_PASSWORDS = 'wb_passwords';
+        const STORAGE_REQUESTS = 'wb_requests';        // заявки на утверждение пароля
+        const GOODS_PREFIX = 'wb_goods_';
+        const STOCK_PREFIX = 'wb_stock_';
+        const OPS_PREFIX = 'wb_operations_';
 
-      function checkLogin() {
-        const user = usernameInput.value.trim();
-        const pass = passwordInput.value.trim();
-        if (user === 'admin' && pass === 'tmc123') {
-          loginContainer.style.display = 'none';
-          appContainer.style.display = 'block';
-          initApp(); // запускаем приложение после успешного входа
-        } else {
-          alert('Неверный логин или пароль');
-        }
-      }
+        // ---------- Глобальные переменные ----------
+        let currentWarehouse = null;
+        let currentUserPassword = '';
+        let isAdmin = false;               // флаг, что текущий пользователь - админ
 
-      loginBtn.addEventListener('click', checkLogin);
-      passwordInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') checkLogin();
-      });
-
-      // ========== ВЕСЬ ОСТАЛЬНОЙ КОД УЧЕТА ТМЦ ==========
-      // --- СОСТОЯНИЕ ---
-      let items = [];
-      let transactions = [];
-      let catalog = [];
-
-      const STORAGE_ITEMS = 'tmc_items_warehouse';
-      const STORAGE_TRANS = 'tmc_trans_warehouse';
-      const STORAGE_CATALOG = 'tmc_catalog_warehouse';
-
-      const defaultCatalog = [
-        "ВПП 2-х Слойная 1.2м*100м*40гр/м2 *РУЛОНЫ*",
-        "Гофроящик 400*300*370 Т23В *ПАЛЛЕТ*520шт",
-        "Гофроящик 600*400*400 П31ВС *ПАЛЛЕТ*140шт",
-        "Гофроящик 690*520*450 П31ВС *ПАЛЛЕТ*",
-        "Гофроящик 115х115х90 Т21В *ПАЛЛЕТ*",
-        "Гофроящик 140*140*105 Т21В *ПАЛЛЕТ*",
-        "Гофроящик 150*150*100",
-        "Гофроящик 220*120*105 Т21В *ПАЛЛЕТ*",
-        "Гофроящик 260*120*105 Т21В *ПАЛЛЕТ*",
-        "Гофроящик 350*130*95 Т21В *ПАЛЛЕТ*",
-        "Гофроящик 350*200*120 (микра) *ПАЛЛЕТ*",
-        "Гофроящик 350*350*120 (микра) *ПАЛЛЕТ*",
-        "Гофроящик 600*350*120 (микра) *ПАЛЛЕТ*",
-        "Номерная пломба-наклейка 20х30 мм *КОРОБКИ*",
-        "Пакет ПСД 25х35 100мкм *ПАЛЛЕТ*",
-        "Пакет ПСД 30х40 35 мкм *ПАЛЛЕТ*",
-        "Пакет ПСД 40х50 35 мкм *ПАЛЛЕТ*",
-        "Пакет псд 60х75 50мкм *ПАЛЛЕТ*",
-        "Пленка ПСД (Рукав) 600мм 50мкм *РУЛОН*",
-        "Стрейч пленка 500мм х 23мкм 2кг нетто *КОРОБКА*",
-        "Пломба металл с ШК *КОРОБКА*",
-        "Пломба пластик с ШК *КОРОБКА*",
-        "Резинка банковская *МЕШОК*, кг",
-        "Скотч 72мм х 66м 45 мкр *ПАЛЛЕТ*",
-        "Термоэтикетка 100*75/1000 ЭКО *КОРОБКА*",
-        "Термоэтикетка 100*25/1000 ЭКО *КОРОБКА*",
-        "Термоэтикетка 50*50 (1000 шт/рул)-40 эко *КОРОБКА*",
-        "Термоэтикетка 50х60 (500 шт./рул.) QR *КОРОБКА*",
-        "Курьер-пакет 160х255+30 (45 мкр) с QR *ПАЛЛЕТ* 84000 ШТ",
-        "Курьер-пакет 200х300+30(45 мкр) c QR *ПАЛЛЕТ* 63000 ШТ",
-        "Курьер-пакет 250х400+35 (45 мкр) с QR *ПАЛЛЕТ* 54000 ШТ",
-        "Курьер-пакет 350х450+35 (45 мкр) с QR *ПАЛЛЕТ* 33600 ШТ",
-        "Курьер-пакет 450х650+40 (45 мкр) с QR *ПАЛЛЕТ* 17500 ШТ",
-        "Курьер-пакет 550х650+40 (45 мкр) с QR *ПАЛЛЕТ* 11200 ШТ",
-        "Курьер-пакет 800х760+40 (45 мкр) с QR *ПАЛЛЕТ* 8750 ШТ",
-        "Бумага А4",
-        "Нихром",
-        "ТТН",
-        "Магнитные карты",
-        "ТН",
-        "Скотч синий",
-        "Клейкая лента \"ОСТОРОЖНО !!! ХРУПКОЕ !!!\""
-      ];
-
-      function loadFromStorage() {
-        let storedItems = localStorage.getItem(STORAGE_ITEMS);
-        if (storedItems) { try { items = JSON.parse(storedItems); } catch { items = []; } } 
-        else { items = [ { name: 'Бумага А4', quantity: 150 }, { name: 'Ручка шариковая', quantity: 320 }, { name: 'Степлер', quantity: 12 } ]; }
-
-        let storedTrans = localStorage.getItem(STORAGE_TRANS);
-        if (storedTrans) { try { transactions = JSON.parse(storedTrans); } catch { transactions = []; } } 
-        else {
-          const today = new Date();
-          const d1 = new Date(today); d1.setDate(today.getDate()-7);
-          const d2 = new Date(today); d2.setDate(today.getDate()-3);
-          transactions = [
-            { id: '1', type: 'income', itemName: 'Бумага А4', quantity: 200, date: d1.toISOString(), comment: 'Поставка от ООО Рога' },
-            { id: '2', type: 'outcome', itemName: 'Бумага А4', quantity: 30, date: d2.toISOString(), comment: 'Выдано бухгалтерии' },
-            { id: '3', type: 'outcome', itemName: 'Бумага А4', quantity: 20, date: new Date(today.getFullYear(), today.getMonth(), today.getDate()-1).toISOString(), comment: 'Канцелярия' },
-            { id: '4', type: 'income', itemName: 'Ручка шариковая', quantity: 300, date: d1.toISOString(), comment: '' },
-            { id: '5', type: 'outcome', itemName: 'Ручка шариковая', quantity: 30, date: d2.toISOString(), comment: '' },
-            { id: '6', type: 'outcome', itemName: 'Степлер', quantity: 3, date: d2.toISOString(), comment: '' },
-            { id: '7', type: 'income', itemName: 'Степлер', quantity: 15, date: d1.toISOString(), comment: '' }
-          ];
-        }
-
-        let storedCatalog = localStorage.getItem(STORAGE_CATALOG);
-        if (storedCatalog) { try { catalog = JSON.parse(storedCatalog); } catch { catalog = []; } } 
-        else { catalog = [...defaultCatalog]; }
-
-        saveToStorage();
-      }
-
-      function saveToStorage() {
-        localStorage.setItem(STORAGE_ITEMS, JSON.stringify(items));
-        localStorage.setItem(STORAGE_TRANS, JSON.stringify(transactions));
-        localStorage.setItem(STORAGE_CATALOG, JSON.stringify(catalog));
-      }
-
-      function findItemByName(name) { return items.find(i => i.name === name); }
-      function updateItemQuantity(name, delta) {
-        let item = findItemByName(name);
-        if (item) { item.quantity += delta; if (item.quantity < 0) item.quantity = 0; }
-        else if (delta > 0) { items.push({ name, quantity: delta }); }
-        else return false;
-        saveToStorage(); return true;
-      }
-      function generateId() { return Date.now() + '-' + Math.random().toString(36).substr(2,9); }
-
-      function addToCatalog(newName) {
-        newName = newName.trim();
-        if (!newName) return false;
-        if (catalog.includes(newName)) { alert('Такое наименование уже есть'); return false; }
-        catalog.push(newName);
-        saveToStorage();
-        renderAllSelects();
-        renderCatalogTable();
-        return true;
-      }
-
-      function removeFromCatalog(nameToRemove) {
-        let idx = catalog.indexOf(nameToRemove);
-        if (idx === -1) return false;
-        let item = findItemByName(nameToRemove);
-        if (item && item.quantity > 0) {
-          if (!confirm(`Товар "${nameToRemove}" имеет остаток ${item.quantity} шт. Удалить из каталога?`)) return false;
-        }
-        catalog.splice(idx, 1);
-        saveToStorage();
-        renderAllSelects();
-        renderCatalogTable();
-        return true;
-      }
-
-      function filterSelect(selectId, searchInputId) {
-        let select = document.getElementById(selectId);
-        let filter = document.getElementById(searchInputId).value.toLowerCase();
-        for (let opt of select.options) {
-          opt.style.display = opt.text.toLowerCase().includes(filter) ? '' : 'none';
-        }
-        for (let opt of select.options) {
-          if (opt.style.display !== 'none') {
-            select.value = opt.value;
-            break;
-          }
-        }
-      }
-
-      function renderSelect(selectId) {
-        let select = document.getElementById(selectId);
-        if (!select) return;
-        select.innerHTML = '';
-        catalog.forEach(name => {
-          let opt = document.createElement('option');
-          opt.value = name;
-          opt.textContent = name;
-          select.appendChild(opt);
-        });
-        if (catalog.length === 0) {
-          let opt = document.createElement('option');
-          opt.value = '';
-          opt.textContent = '— каталог пуст —';
-          select.appendChild(opt);
-        }
-      }
-
-      function renderAllSelects() {
-        renderSelect('incomeSelect');
-        renderSelect('outcomeSelect');
-      }
-
-      function renderCatalogTable() {
-        let tbody = document.getElementById('catalogBody');
-        tbody.innerHTML = '';
-        if (catalog.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="2" style="text-align:center;">Каталог пуст</td></tr>';
-          return;
-        }
-        catalog.forEach(name => {
-          let tr = document.createElement('tr');
-          tr.innerHTML = `<td>${name}</td><td><span class="delete-item" data-name="${name.replace(/"/g, '&quot;')}" style="cursor:pointer;color:#c0392b;font-size:1.5rem;">✖</span></td>`;
-          tbody.appendChild(tr);
-        });
-        document.querySelectorAll('.delete-item').forEach(btn => {
-          btn.addEventListener('click', (e) => {
-            let name = e.target.dataset.name;
-            if (name && confirm(`Удалить "${name}" из каталога?`)) removeFromCatalog(name);
-          });
-        });
-      }
-
-      function renderStock() {
-        let tbody = document.getElementById('stockBody');
-        tbody.innerHTML = '';
-        if (items.length === 0) { tbody.innerHTML = '<tr><td colspan="2" style="text-align:center;">Нет товаров</td></tr>'; return; }
-        let sorted = [...items].sort((a,b) => a.name.localeCompare(b.name));
-        sorted.forEach(item => {
-          let row = tbody.insertRow();
-          row.innerHTML = `<td>${item.name}</td><td><span class="badge">${item.quantity}</span></td>`;
-          if (item.quantity < 10) row.classList.add('low-stock');
-        });
-      }
-
-      function renderReport(fromDate, toDate) {
-        let tbody = document.getElementById('reportBody');
-        let summaryDiv = document.getElementById('reportSummary');
-        tbody.innerHTML = '';
-        let filtered = transactions.filter(t => t.type === 'outcome');
-        if (fromDate && toDate) {
-          let from = new Date(fromDate); from.setHours(0,0,0,0);
-          let to = new Date(toDate); to.setHours(23,59,59,999);
-          filtered = filtered.filter(t => { let d = new Date(t.date); return d >= from && d <= to; });
-        }
-        if (filtered.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">Нет расхода за период</td></tr>';
-          summaryDiv.textContent = 'За период расходов нет.';
-          return;
-        }
-        let summary = {};
-        filtered.forEach(t => summary[t.itemName] = (summary[t.itemName] || 0) + t.quantity);
-        let totalItems = Object.keys(summary).length;
-        let totalQty = Object.values(summary).reduce((a,b) => a + b, 0);
-        summaryDiv.textContent = `📦 Всего израсходовано позиций: ${totalItems}, общее количество: ${totalQty} шт.`;
-        filtered.sort((a,b) => new Date(b.date) - new Date(a.date));
-        filtered.forEach(t => {
-          let d = new Date(t.date).toLocaleDateString('ru-RU');
-          let comment = t.comment || '';
-          tbody.innerHTML += `<tr><td>${d}</td><td>${t.itemName}</td><td>${t.quantity}</td><td>${comment}</td></tr>`;
-        });
-      }
-
-      function renderTop10() {
-        let tbody = document.getElementById('topBody');
-        tbody.innerHTML = '';
-        let outcomeMap = new Map();
-        transactions.filter(t => t.type === 'outcome').forEach(t => {
-          if (!outcomeMap.has(t.itemName)) outcomeMap.set(t.itemName, { total: 0, ops: 0 });
-          let rec = outcomeMap.get(t.itemName);
-          rec.total += t.quantity;
-          rec.ops += 1;
-        });
-        let sorted = Array.from(outcomeMap.entries()).map(([name, data]) => ({ name, ...data })).sort((a,b) => b.total - a.total).slice(0,10);
-        if (sorted.length === 0) { tbody.innerHTML = '<tr><td colspan="4">Нет данных о расходе</td></tr>'; return; }
-        sorted.forEach((item, idx) => {
-          tbody.innerHTML += `<tr><td>${idx+1}</td><td>${item.name}</td><td>${item.total}</td><td>${item.ops}</td></tr>`;
-        });
-      }
-
-      function exportToExcel() {
-        let html = `<html><head><meta charset="UTF-8"><title>Остатки ТМЦ</title></head><body><h2>Остатки товаров</h2><table border="1"><tr><th>Наименование</th><th>Остаток</th></tr>`;
-        items.sort((a,b) => a.name.localeCompare(b.name)).forEach(i => {
-          html += `<tr><td>${i.name}</td><td>${i.quantity}</td></tr>`;
-        });
-        html += `</table></body></html>`;
-        let blob = new Blob([html], { type: 'application/vnd.ms-excel' });
-        let link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = 'ostatki.xls';
-        link.click();
-      }
-
-      function exportJSON() {
-        let data = { items, transactions, catalog };
-        let blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-        let link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = 'tmc_backup.json';
-        link.click();
-      }
-
-      function importJSON(file) {
-        let reader = new FileReader();
-        reader.onload = (e) => {
-          try {
-            let data = JSON.parse(e.target.result);
-            if (data.items && Array.isArray(data.items)) items = data.items;
-            if (data.transactions && Array.isArray(data.transactions)) transactions = data.transactions;
-            if (data.catalog && Array.isArray(data.catalog)) catalog = data.catalog;
-            saveToStorage();
-            alert('Импорт успешен!');
-            location.reload();
-          } catch (ex) { alert('Ошибка импорта: ' + ex); }
-        };
-        reader.readAsText(file);
-      }
-
-      function showMessage(containerId, text, type = 'info') {
-        let msgDiv = document.getElementById(containerId);
-        msgDiv.style.display = 'block';
-        msgDiv.className = 'alert ' + (type === 'success' ? 'success' : type === 'error' ? 'error' : '');
-        msgDiv.textContent = text;
-        setTimeout(() => { msgDiv.style.display = 'none'; }, 3000);
-      }
-
-      // --- ИНИЦИАЛИЗАЦИЯ ПРИЛОЖЕНИЯ (вызывается после входа) ---
-      function initApp() {
-        loadFromStorage();
-        renderAllSelects();
-        renderCatalogTable();
-        renderStock();
-        renderTop10();
-
-        // --- обработчики вкладок ---
-        const tabBtns = document.querySelectorAll('.tab-btn');
-        const panes = document.querySelectorAll('.tab-pane');
-        tabBtns.forEach(btn => {
-          btn.addEventListener('click', (e) => {
-            if (btn.id === 'helpBtn') { 
-              alert('Горячие клавиши: Ctrl+Shift+1..6 (только вне полей ввода)'); 
-              return; 
+        // ---------- Инициализация хранилищ ----------
+        function initStorage() {
+            if (!localStorage.getItem(STORAGE_WAREHOUSES)) {
+                // Предустановленные склады, включая админский
+                const defaultWarehouses = [
+                    'Минск Щомыслицкий 2.0',
+                    'Минск Хатежино',
+                    'Минск Привольный',
+                    'Брест',
+                    'Гродно',
+                    'Гомель',
+                    'Орша',
+                    'Бобруйск'
+                ];
+                localStorage.setItem(STORAGE_WAREHOUSES, JSON.stringify(defaultWarehouses));
             }
-            let tabId = btn.dataset.tab;
-            tabBtns.forEach(b => b.classList.remove('active'));
-            panes.forEach(p => p.classList.remove('active'));
-            btn.classList.add('active');
-            document.getElementById(`tab-${tabId}`).classList.add('active');
-            if (tabId === 'stock') renderStock();
-            if (tabId === 'report') {
-              let from = document.getElementById('dateFrom').value;
-              let to = document.getElementById('dateTo').value;
-              renderReport(from, to);
+            if (!localStorage.getItem(STORAGE_PASSWORDS)) {
+                // Устанавливаем пароль для админа по умолчанию
+                const passwords = {};
+                passwords['Минск Щомыслицкий 2.0'] = 'Минск5';
+                localStorage.setItem(STORAGE_PASSWORDS, JSON.stringify(passwords));
             }
-            if (tabId === 'catalog') renderCatalogTable();
-            if (tabId === 'analytics') renderTop10();
-          });
-        });
-
-        // --- поиск ---
-        document.getElementById('incomeSearch').addEventListener('input', () => filterSelect('incomeSelect', 'incomeSearch'));
-        document.getElementById('outcomeSearch').addEventListener('input', () => filterSelect('outcomeSelect', 'outcomeSearch'));
-
-        // --- принять ---
-        document.getElementById('incomeBtn').addEventListener('click', () => {
-          let select = document.getElementById('incomeSelect');
-          let name = select.value;
-          if (!name || catalog.length === 0) { showMessage('incomeMessage', 'Выберите товар из списка', 'error'); return; }
-          let qty = parseInt(document.getElementById('incomeQty').value, 10);
-          if (isNaN(qty) || qty <= 0) { showMessage('incomeMessage', 'Количество должно быть положительным', 'error'); return; }
-          let comment = document.getElementById('incomeComment').value.trim();
-          updateItemQuantity(name, qty);
-          transactions.push({ id: generateId(), type: 'income', itemName: name, quantity: qty, date: new Date().toISOString(), comment });
-          saveToStorage();
-          showMessage('incomeMessage', `✅ +${qty} «${name}» принято`, 'success');
-          document.getElementById('incomeComment').value = '';
-          renderStock();
-        });
-
-        // --- выдать ---
-        document.getElementById('outcomeBtn').addEventListener('click', () => {
-          let select = document.getElementById('outcomeSelect');
-          let name = select.value;
-          if (!name || catalog.length === 0) { showMessage('outcomeMessage', 'Выберите товар из списка', 'error'); return; }
-          let qty = parseInt(document.getElementById('outcomeQty').value, 10);
-          if (isNaN(qty) || qty <= 0) { showMessage('outcomeMessage', 'Количество должно быть положительным', 'error'); return; }
-          let item = findItemByName(name);
-          if (!item || item.quantity < qty) { showMessage('outcomeMessage', `❌ Недостаточно остатка (доступно ${item ? item.quantity : 0})`, 'error'); return; }
-          let comment = document.getElementById('outcomeComment').value.trim();
-          updateItemQuantity(name, -qty);
-          transactions.push({ id: generateId(), type: 'outcome', itemName: name, quantity: qty, date: new Date().toISOString(), comment });
-          saveToStorage();
-          showMessage('outcomeMessage', `✅ -${qty} «${name}» выдано`, 'success');
-          document.getElementById('outcomeComment').value = '';
-          renderStock();
-        });
-
-        function promptNewItem(callback) {
-          let newName = prompt('Введите новое наименование ТМЦ:');
-          if (!newName) return;
-          if (addToCatalog(newName)) { if (callback) callback(newName); }
+            if (!localStorage.getItem(STORAGE_REQUESTS)) {
+                localStorage.setItem(STORAGE_REQUESTS, JSON.stringify([]));
+            }
         }
-        document.getElementById('addNewFromIncome').addEventListener('click', () => {
-          promptNewItem((newName) => { document.getElementById('incomeSelect').value = newName; filterSelect('incomeSelect','incomeSearch'); });
-        });
-        document.getElementById('addNewFromOutcome').addEventListener('click', () => {
-          promptNewItem((newName) => { document.getElementById('outcomeSelect').value = newName; filterSelect('outcomeSelect','outcomeSearch'); });
-        });
+        initStorage();
 
-        function deleteSelectedFrom(selectId) {
-          let select = document.getElementById(selectId);
-          if (!select || !select.value) return;
-          let name = select.value;
-          removeFromCatalog(name);
-          if (catalog.length > 0) select.value = catalog[0];
+        // ---------- Работа со складами ----------
+        function getWarehouses() {
+            return JSON.parse(localStorage.getItem(STORAGE_WAREHOUSES)) || [];
         }
-        document.getElementById('delSelectedFromIncome').addEventListener('click', () => deleteSelectedFrom('incomeSelect'));
-        document.getElementById('delSelectedFromOutcome').addEventListener('click', () => deleteSelectedFrom('outcomeSelect'));
 
-        document.getElementById('addCatalogBtn').addEventListener('click', () => {
-          let input = document.getElementById('newCatalogName');
-          let name = input.value.trim();
-          if (addToCatalog(name)) input.value = '';
-        });
+        function saveWarehouses(warehouses) {
+            localStorage.setItem(STORAGE_WAREHOUSES, JSON.stringify(warehouses));
+        }
 
-        document.getElementById('refreshStockBtn').addEventListener('click', renderStock);
+        function getPasswords() {
+            return JSON.parse(localStorage.getItem(STORAGE_PASSWORDS)) || {};
+        }
 
-        document.getElementById('reportBtn').addEventListener('click', () => {
-          let from = document.getElementById('dateFrom').value;
-          let to = document.getElementById('dateTo').value;
-          if (!from || !to) { alert('Выберите обе даты'); return; }
-          renderReport(from, to);
-        });
+        function savePasswords(passwords) {
+            localStorage.setItem(STORAGE_PASSWORDS, JSON.stringify(passwords));
+        }
 
-        document.getElementById('exportExcelBtn').addEventListener('click', exportToExcel);
-        document.getElementById('exportDataBtn').addEventListener('click', exportJSON);
+        // ---------- Заявки на регистрацию ----------
+        function getRequests() {
+            return JSON.parse(localStorage.getItem(STORAGE_REQUESTS)) || [];
+        }
 
-        document.getElementById('importDataBtn').addEventListener('click', () => {
-          document.getElementById('importFile').click();
-        });
-        document.getElementById('importFile').addEventListener('change', (e) => {
-          if (e.target.files.length) importJSON(e.target.files[0]);
-          e.target.value = '';
-        });
+        function saveRequests(requests) {
+            localStorage.setItem(STORAGE_REQUESTS, JSON.stringify(requests));
+        }
 
-        document.getElementById('resetAllBtn').addEventListener('click', () => {
-          if (confirm('Восстановить демо-данные?')) {
-            localStorage.removeItem(STORAGE_ITEMS);
-            localStorage.removeItem(STORAGE_TRANS);
-            localStorage.removeItem(STORAGE_CATALOG);
-            location.reload();
-          }
-        });
+        function addRequest(warehouse, password) {
+            const requests = getRequests();
+            // Проверяем, нет ли уже неподтверждённой заявки для этого склада
+            const existing = requests.find(r => r.warehouse === warehouse && !r.approved && !r.rejected);
+            if (!existing) {
+                requests.push({
+                    id: 'req_' + Date.now() + Math.random(),
+                    warehouse: warehouse,
+                    password: password,
+                    approved: false,
+                    rejected: false,
+                    date: new Date().toISOString()
+                });
+                saveRequests(requests);
+                updateNotificationBell();
+            }
+        }
 
-        // горячие клавиши
-        window.addEventListener('keydown', (e) => {
-          if (e.ctrlKey && e.shiftKey) {
-            let map = { '1': 'income', '2': 'outcome', '3': 'stock', '4': 'report', '5': 'catalog', '6': 'analytics' };
-            let tab = map[e.key];
-            if (tab) {
-              if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') {
+        // Одобрить заявку
+        function approveRequest(requestId) {
+            const requests = getRequests();
+            const request = requests.find(r => r.id === requestId);
+            if (request) {
+                request.approved = true;
+                // Устанавливаем пароль для склада
+                const passwords = getPasswords();
+                passwords[request.warehouse] = request.password;
+                savePasswords(passwords);
+                saveRequests(requests);
+            }
+            updateNotificationBell();
+        }
+
+        // Отклонить заявку (просто пометим rejected)
+        function rejectRequest(requestId) {
+            const requests = getRequests();
+            const request = requests.find(r => r.id === requestId);
+            if (request) {
+                request.rejected = true;
+                saveRequests(requests);
+            }
+            updateNotificationBell();
+        }
+
+        // Сброс пароля пользователя админом
+        function resetUserPassword(warehouse) {
+            const passwords = getPasswords();
+            delete passwords[warehouse];
+            savePasswords(passwords);
+            // Удаляем неподтверждённые заявки для этого склада (они больше не актуальны)
+            const requests = getRequests();
+            const filtered = requests.filter(r => r.warehouse !== warehouse || r.approved);
+            saveRequests(filtered);
+            updateNotificationBell();
+        }
+
+        // ---------- Проверка, является ли пользователь админом ----------
+        function checkIsAdmin(warehouse, password) {
+            return warehouse === 'Минск Щомыслицкий 2.0' && password === 'Минск5';
+        }
+
+        // ---------- Обновление колокольчика ----------
+        function updateNotificationBell() {
+            const bell = document.getElementById('notification-bell');
+            if (!bell) return;
+            const requests = getRequests();
+            const hasNew = requests.some(r => !r.approved && !r.rejected);
+            if (hasNew) {
+                bell.classList.add('has-new');
+            } else {
+                bell.classList.remove('has-new');
+            }
+        }
+
+        // ---------- Авторизация (изменена: теперь с заявками) ----------
+        function tryLogin(warehouse, password) {
+            const passwords = getPasswords();
+            // Если это админ - пускаем сразу
+            if (checkIsAdmin(warehouse, password)) {
+                return { success: true, isAdmin: true };
+            }
+            // Если пароль уже установлен для склада
+            if (passwords.hasOwnProperty(warehouse)) {
+                if (passwords[warehouse] === password) {
+                    return { success: true, isAdmin: false };
+                } else {
+                    return { success: false, message: 'Неверный пароль' };
+                }
+            } else {
+                // Пароль ещё не задан - создаём заявку
+                addRequest(warehouse, password);
+                return { success: false, message: 'Запрос на регистрацию отправлен администратору. Ожидайте подтверждения.' };
+            }
+        }
+
+        // ---------- Демо-инициализация справочника (характеристики) ----------
+        function ensureDemoGoods(warehouse) {
+            let goods = getGoods(warehouse);
+            if (goods.length === 0) {
+                const demoList = [
+                    "ВПП 2-х Слойная 1.2м*100м*40гр/м2 *РУЛОНЫ*",
+                    "Гофроящик 400*300*370 Т23В *ПАЛЛЕТ*520шт",
+                    "Гофроящик 600*400*400 П31ВС *ПАЛЛЕТ*140шт",
+                    "Гофроящик 690*520*450 П31ВС *ПАЛЛЕТ*",
+                    "Гофроящик 115х115х90 Т21В *ПАЛЛЕТ*",
+                    "Гофроящик 140*140*105 Т21В *ПАЛЛЕТ*",
+                    "Гофроящик 150*150*100",
+                    "Гофроящик 220*120*105 Т21В *ПАЛЛЕТ*",
+                    "Гофроящик 260*120*105 Т21В *ПАЛЛЕТ*",
+                    "Гофроящик 350*130*95 Т21В *ПАЛЛЕТ*",
+                    "Гофроящик 350*200*120 (микра) *ПАЛЛЕТ*",
+                    "Гофроящик 350*350*120 (микра) *ПАЛЛЕТ*",
+                    "Гофроящик 600*350*120 (микра) *ПАЛЛЕТ*",
+                    "Номерная пломба-наклейка 20х30 мм *КОРОБКИ*",
+                    "Пакет ПСД 25х35 100мкм *ПАЛЛЕТ*",
+                    "Пакет ПСД 30х40 35 мкм *ПАЛЛЕТ*",
+                    "Пакет ПСД 40х50 35 мкм *ПАЛЛЕТ*",
+                    "Пакет псд 60х75 50мкм *ПАЛЛЕТ*",
+                    "Пленка ПСД (Рукав) 600мм 50мкм *РУЛОН*",
+                    "Стрейч пленка 500мм х 23мкм 2кг нетто *КОРОБКА*",
+                    "Пломба металл с ШК *КОРОБКА*",
+                    "Пломба пластик с ШК *КОРОБКА*",
+                    "Резинка банковская *МЕШОК*, кг",
+                    "Скотч 72мм х 66м 45 мкр *ПАЛЛЕТ*",
+                    "Термоэтикетка 100*75/1000 ЭКО *КОРОБКА*",
+                    "Термоэтикетка 100*25/1000 ЭКО *КОРОБКА*",
+                    "Термоэтикетка 50*50 (1000 шт/рул)-40 эко *КОРОБКА*",
+                    "Термоэтикетка 50х60 (500 шт./рул.) QR *КОРОБКА*",
+                    "Курьер-пакет 160х255+30 (45 мкр) с QR *ПАЛЛЕТ* 84000 ШТ",
+                    "Курьер-пакет 200х300+30(45 мкр) c QR *ПАЛЛЕТ* 63000 ШТ",
+                    "Курьер-пакет 250х400+35 (45 мкр) с QR *ПАЛЛЕТ* 54000 ШТ",
+                    "Курьер-пакет 350х450+35 (45 мкр) с QR *ПАЛЛЕТ* 33600 ШТ",
+                    "Курьер-пакет 450х650+40 (45 мкр) с QR *ПАЛЛЕТ* 17500 ШТ",
+                    "Курьер-пакет 550х650+40 (45 мкр) с QR *ПАЛЛЕТ* 11200 ШТ",
+                    "Курьер-пакет 800х760+40 (45 мкр) с QR *ПАЛЛЕТ* 8750 ШТ"
+                ];
+                goods = demoList.map((name, idx) => ({
+                    id: 'g' + idx + Date.now() + Math.random(),
+                    name: name,
+                    piecesPerPallet: 100
+                }));
+                saveGoods(warehouse, goods);
+                saveStock(warehouse, []);
+                // Не добавляем демо-операции для простоты
+            }
+        }
+
+        // ---------- Функции для работы с товарами и остатками (без изменений) ----------
+        function getGoods(warehouse) {
+            const key = GOODS_PREFIX + warehouse;
+            return JSON.parse(localStorage.getItem(key)) || [];
+        }
+        function saveGoods(warehouse, goods) {
+            const key = GOODS_PREFIX + warehouse;
+            localStorage.setItem(key, JSON.stringify(goods));
+        }
+        function getStock(warehouse) {
+            const key = STOCK_PREFIX + warehouse;
+            return JSON.parse(localStorage.getItem(key)) || [];
+        }
+        function saveStock(warehouse, stock) {
+            const key = STOCK_PREFIX + warehouse;
+            localStorage.setItem(key, JSON.stringify(stock));
+        }
+        function updateStock(warehouse, goodId, newQty, newPallets) {
+            let stock = getStock(warehouse);
+            const index = stock.findIndex(s => s.goodId === goodId);
+            if (index >= 0) {
+                stock[index].quantity = newQty;
+                stock[index].pallets = newPallets;
+            } else {
+                stock.push({ goodId, quantity: newQty, pallets: newPallets });
+            }
+            saveStock(warehouse, stock);
+        }
+        function getStockItem(warehouse, goodId) {
+            const stock = getStock(warehouse);
+            return stock.find(s => s.goodId === goodId) || { quantity: 0, pallets: 0 };
+        }
+        function getOperations(warehouse) {
+            const key = OPS_PREFIX + warehouse;
+            return JSON.parse(localStorage.getItem(key)) || [];
+        }
+        function saveOperations(warehouse, ops) {
+            const key = OPS_PREFIX + warehouse;
+            localStorage.setItem(key, JSON.stringify(ops));
+        }
+
+        // ---------- Добавление/удаление складов (с проверкой на админа) ----------
+        function addWarehouse(name) {
+            if (!name) return false;
+            const warehouses = getWarehouses();
+            if (warehouses.includes(name)) return false;
+            warehouses.push(name);
+            saveWarehouses(warehouses);
+            saveGoods(name, []);
+            saveStock(name, []);
+            saveOperations(name, []);
+            return true;
+        }
+
+        function removeWarehouse(name) {
+            // Удалять склад может только админ
+            if (!isAdmin) {
+                alert('Только администратор может удалять склады');
+                return false;
+            }
+            const warehouses = getWarehouses();
+            const idx = warehouses.indexOf(name);
+            if (idx === -1) return false;
+            warehouses.splice(idx, 1);
+            saveWarehouses(warehouses);
+            const pwd = getPasswords();
+            delete pwd[name];
+            savePasswords(pwd);
+            localStorage.removeItem(GOODS_PREFIX + name);
+            localStorage.removeItem(STOCK_PREFIX + name);
+            localStorage.removeItem(OPS_PREFIX + name);
+            return true;
+        }
+
+        // ---------- UI: рендеринг списка складов ----------
+        function renderWarehouseSelect() {
+            const select = document.getElementById('warehouse-select');
+            const warehouses = getWarehouses();
+            select.innerHTML = '';
+            warehouses.forEach(w => {
+                const option = document.createElement('option');
+                option.value = w;
+                option.textContent = w;
+                select.appendChild(option);
+            });
+        }
+
+        // ---------- Переключение вкладок ----------
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            let tabButton = document.querySelector(`.tab[data-tab="${tabId}"]`);
+            if (!tabButton && tabId === 'requests') {
+                // Может быть вкладка заявок, созданная динамически
+                tabButton = document.querySelector(`.tab[data-tab="requests"]`);
+            }
+            if (tabButton) tabButton.classList.add('active');
+            renderTabContent(tabId);
+        }
+
+        function renderTabContent(tabId) {
+            const container = document.getElementById('tab-content');
+            if (!currentWarehouse && !isAdmin) return;
+            switch (tabId) {
+                case 'catalog': renderCatalog(container); break;
+                case 'receipt': renderReceipt(container); break;
+                case 'dispatch': renderDispatch(container); break;
+                case 'inventory': renderInventory(container); break;
+                case 'history': renderHistory(container); break;
+                case 'balances': renderBalances(container); break;
+                case 'requests': renderRequests(container); break;
+                default: container.innerHTML = '<div class="message">Выберите вкладку</div>';
+            }
+        }
+
+        // ---------- Рендер каталога (без изменений, но убрано удаление товаров для не-админа? оставим как есть) ----------
+        function renderCatalog(container) {
+            let goods = getGoods(currentWarehouse);
+            let html = `
+                <div class="flex-between">
+                    <h2 style="color:#8b4ec7;">Справочник товаров</h2>
+                    <button class="btn" id="add-good-btn">➕ Добавить товар</button>
+                </div>
+                <div class="table-container">
+                <table>
+                    <thead><tr><th>Наименование</th><th>Штук на паллете</th><th>Действия</th></tr></thead>
+                    <tbody>
+            `;
+            goods.forEach(g => {
+                html += `<tr>
+                    <td>${escapeHtml(g.name)}</td>
+                    <td>${g.piecesPerPallet}</td>
+                    <td>
+                        <button class="btn-small btn-secondary edit-good" data-id="${g.id}">✏️</button>
+                        <button class="btn-small btn-danger delete-good" data-id="${g.id}">🗑️</button>
+                    </td>
+                </tr>`;
+            });
+            html += `</tbody></table></div>`;
+            container.innerHTML = html;
+
+            document.getElementById('add-good-btn')?.addEventListener('click', () => {
+                const name = prompt('Введите наименование товара:');
+                if (!name) return;
+                const ppp = parseInt(prompt('Количество штук на одной паллете (норма):', '100') || '100', 10);
+                if (isNaN(ppp) || ppp <= 0) {
+                    alert('ПУ-ПУ-ПУ');
+                    return;
+                }
+                goods.push({
+                    id: 'g' + Date.now() + Math.random(),
+                    name: name,
+                    piecesPerPallet: ppp
+                });
+                saveGoods(currentWarehouse, goods);
+                renderCatalog(container);
+            });
+
+            document.querySelectorAll('.edit-good').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const id = e.target.dataset.id;
+                    const good = goods.find(g => g.id === id);
+                    if (!good) return;
+                    const newName = prompt('Новое наименование:', good.name);
+                    if (newName === null) return;
+                    const newPpp = parseInt(prompt('Новое количество штук на паллете:', good.piecesPerPallet) || good.piecesPerPallet, 10);
+                    if (isNaN(newPpp) || newPpp <= 0) {
+                        alert('ПУ-ПУ-ПУ');
+                        return;
+                    }
+                    good.name = newName;
+                    good.piecesPerPallet = newPpp;
+                    saveGoods(currentWarehouse, goods);
+                    renderCatalog(container);
+                });
+            });
+
+            document.querySelectorAll('.delete-good').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    if (!isAdmin) {
+                        alert('Только администратор может удалять товары');
+                        return;
+                    }
+                    if (!confirm('Удалить товар? Также будут удалены все остатки и операции по нему.')) return;
+                    const id = e.target.dataset.id;
+                    goods = goods.filter(g => g.id !== id);
+                    saveGoods(currentWarehouse, goods);
+                    let stock = getStock(currentWarehouse);
+                    stock = stock.filter(s => s.goodId !== id);
+                    saveStock(currentWarehouse, stock);
+                    let ops = getOperations(currentWarehouse);
+                    ops = ops.filter(op => op.goodId !== id);
+                    saveOperations(currentWarehouse, ops);
+                    renderCatalog(container);
+                });
+            });
+        }
+
+        // ---------- Приход / Расход (как в предыдущей версии, с двусторонней синхронизацией) ----------
+        function renderOperationForm(container, type) {
+            const goods = getGoods(currentWarehouse);
+            const typeText = type === 'receipt' ? 'Приход' : 'Расход';
+            let html = `
+                <h2 style="color:#8b4ec7;">${typeText}</h2>
+                <div class="action-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Товар</label>
+                            <select id="op-good-select">
+                                ${goods.map(g => `<option value="${g.id}" data-ppp="${g.piecesPerPallet}">${escapeHtml(g.name)} (норма: ${g.piecesPerPallet} шт/пал)</option>`).join('')}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Количество штук</label>
+                            <input type="number" id="op-qty" value="0" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label>Количество паллет</label>
+                            <input type="number" id="op-pallets" value="0" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label>Комментарий</label>
+                            <input type="text" id="op-comment" placeholder="Комментарий">
+                        </div>
+                        <div class="form-group">
+                            <button class="btn" id="op-save-btn">✅ Сохранить</button>
+                        </div>
+                    </div>
+                </div>
+                <div id="op-message" class="message" style="display:none;"></div>
+            `;
+            container.innerHTML = html;
+
+            const qtyInput = document.getElementById('op-qty');
+            const palletsInput = document.getElementById('op-pallets');
+            const goodSelect = document.getElementById('op-good-select');
+            let updating = false;
+
+            function getCurrentPPP() {
+                const selected = goodSelect.selectedOptions[0];
+                return selected ? parseInt(selected.dataset.ppp, 10) || 100 : 100;
+            }
+
+            function updatePalletsFromQty() {
+                if (updating) return;
+                updating = true;
+                const ppp = getCurrentPPP();
+                const qty = parseInt(qtyInput.value, 10);
+                if (!isNaN(qty) && qty >= 0) {
+                    const pals = Math.floor(qty / ppp);
+                    palletsInput.value = pals;
+                } else {
+                    palletsInput.value = 0;
+                }
+                updating = false;
+            }
+
+            function updateQtyFromPallets() {
+                if (updating) return;
+                updating = true;
+                const ppp = getCurrentPPP();
+                const pals = parseInt(palletsInput.value, 10);
+                if (!isNaN(pals) && pals >= 0) {
+                    qtyInput.value = pals * ppp;
+                } else {
+                    qtyInput.value = 0;
+                }
+                updating = false;
+            }
+
+            qtyInput.addEventListener('input', updatePalletsFromQty);
+            palletsInput.addEventListener('input', updateQtyFromPallets);
+            goodSelect.addEventListener('change', () => {
+                if (palletsInput.value) updateQtyFromPallets();
+                else if (qtyInput.value) updatePalletsFromQty();
+            });
+
+            document.getElementById('op-save-btn').addEventListener('click', () => {
+                const goodId = goodSelect.value;
+                const good = goods.find(g => g.id === goodId);
+                if (!good) return;
+                let qty = parseInt(qtyInput.value, 10);
+                let pals = parseInt(palletsInput.value, 10);
+                const comment = document.getElementById('op-comment').value || '';
+                if (isNaN(qty) || qty < 0 || isNaN(pals) || pals < 0) {
+                    alert('ПУ-ПУ-ПУ');
+                    return;
+                }
+                if (qty === 0 && pals === 0) {
+                    alert('ПУ-ПУ-ПУ');
+                    showMessage('op-message', 'Добавьте хотя бы 1 штуку или паллету', 'error');
+                    return;
+                }
+
+                let stockItem = getStockItem(currentWarehouse, goodId);
+                let newQty = stockItem.quantity;
+                let newPals = stockItem.pallets;
+
+                if (type === 'receipt') {
+                    newQty += qty;
+                    newPals += pals;
+                } else {
+                    if (stockItem.quantity < qty || stockItem.pallets < pals) {
+                        alert('ПУ-ПУ-ПУ');
+                        showMessage('op-message', 'Недостаточно товара на складе!', 'error');
+                        return;
+                    }
+                    newQty -= qty;
+                    newPals -= pals;
+                }
+
+                updateStock(currentWarehouse, goodId, newQty, newPals);
+
+                const ops = getOperations(currentWarehouse);
+                ops.push({
+                    id: 'op' + Date.now() + Math.random(),
+                    date: new Date().toISOString(),
+                    type: type,
+                    goodId: good.id,
+                    goodName: good.name,
+                    quantity: qty,
+                    pallets: pals,
+                    comment: comment,
+                    user: currentUserPassword
+                });
+                saveOperations(currentWarehouse, ops);
+
+                showMessage('op-message', 'Операция успешно проведена!', 'success');
+                qtyInput.value = '0';
+                palletsInput.value = '0';
+                document.getElementById('op-comment').value = '';
+            });
+        }
+
+        function renderReceipt(container) { renderOperationForm(container, 'receipt'); }
+        function renderDispatch(container) { renderOperationForm(container, 'dispatch'); }
+
+        // ---------- Инвентаризация (аналогично) ----------
+        function renderInventory(container) {
+            const goods = getGoods(currentWarehouse);
+            let html = `
+                <h2 style="color:#8b4ec7;">Инвентаризация (корректировка остатков)</h2>
+                <div class="action-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Товар</label>
+                            <select id="inv-good-select">
+                                ${goods.map(g => `<option value="${g.id}" data-ppp="${g.piecesPerPallet}">${escapeHtml(g.name)} (норма: ${g.piecesPerPallet} шт/пал)</option>`).join('')}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Новое количество штук</label>
+                            <input type="number" id="inv-qty" min="0" value="0">
+                        </div>
+                        <div class="form-group">
+                            <label>Новое количество паллет</label>
+                            <input type="number" id="inv-pallets" min="0" value="0">
+                        </div>
+                        <div class="form-group">
+                            <label>Комментарий</label>
+                            <input type="text" id="inv-comment" placeholder="Причина корректировки">
+                        </div>
+                        <div class="form-group">
+                            <button class="btn" id="inv-save-btn">📝 Установить</button>
+                        </div>
+                    </div>
+                </div>
+                <div id="inv-message" class="message" style="display:none;"></div>
+            `;
+            container.innerHTML = html;
+
+            const qtyInput = document.getElementById('inv-qty');
+            const palletsInput = document.getElementById('inv-pallets');
+            const goodSelect = document.getElementById('inv-good-select');
+            let updating = false;
+
+            function getCurrentPPP() {
+                const selected = goodSelect.selectedOptions[0];
+                return selected ? parseInt(selected.dataset.ppp, 10) || 100 : 100;
+            }
+
+            function updatePalletsFromQty() {
+                if (updating) return;
+                updating = true;
+                const ppp = getCurrentPPP();
+                const qty = parseInt(qtyInput.value, 10);
+                if (!isNaN(qty) && qty >= 0) {
+                    const pals = Math.floor(qty / ppp);
+                    palletsInput.value = pals;
+                } else {
+                    palletsInput.value = 0;
+                }
+                updating = false;
+            }
+
+            function updateQtyFromPallets() {
+                if (updating) return;
+                updating = true;
+                const ppp = getCurrentPPP();
+                const pals = parseInt(palletsInput.value, 10);
+                if (!isNaN(pals) && pals >= 0) {
+                    qtyInput.value = pals * ppp;
+                } else {
+                    qtyInput.value = 0;
+                }
+                updating = false;
+            }
+
+            qtyInput.addEventListener('input', updatePalletsFromQty);
+            palletsInput.addEventListener('input', updateQtyFromPallets);
+            goodSelect.addEventListener('change', () => {
+                if (palletsInput.value) updateQtyFromPallets();
+                else if (qtyInput.value) updatePalletsFromQty();
+            });
+
+            document.getElementById('inv-save-btn').addEventListener('click', () => {
+                const goodId = goodSelect.value;
+                const good = goods.find(g => g.id === goodId);
+                if (!good) return;
+                let newQty = parseInt(qtyInput.value, 10);
+                let newPals = parseInt(palletsInput.value, 10);
+                if (isNaN(newQty) || newQty < 0 || isNaN(newPals) || newPals < 0) {
+                    alert('ПУ-ПУ-ПУ');
+                    return;
+                }
+                const comment = document.getElementById('inv-comment').value || 'Инвентаризация';
+                const oldStock = getStockItem(currentWarehouse, goodId);
+                updateStock(currentWarehouse, goodId, newQty, newPals);
+                const ops = getOperations(currentWarehouse);
+                ops.push({
+                    id: 'op' + Date.now() + Math.random(),
+                    date: new Date().toISOString(),
+                    type: 'inventory',
+                    goodId: good.id,
+                    goodName: good.name,
+                    quantity: newQty,
+                    pallets: newPals,
+                    comment: comment + ` (было: ${oldStock.quantity} шт, ${oldStock.pallets} пал)`,
+                    user: currentUserPassword
+                });
+                saveOperations(currentWarehouse, ops);
+                showMessage('inv-message', 'Остатки скорректированы', 'success');
+                setTimeout(() => renderInventory(container), 1000);
+            });
+        }
+
+        // ---------- История (без изменений) ----------
+        function renderHistory(container) {
+            let ops = getOperations(currentWarehouse);
+            ops.sort((a,b) => new Date(b.date) - new Date(a.date));
+            let html = `
+                <h2 style="color:#8b4ec7;">История операций</h2>
+                <div class="filter-group">
+                    <input type="text" id="history-filter" placeholder="Фильтр по товару" style="padding:10px; border-radius:30px; border:2px solid #d9b3ff;">
+                    <select id="history-type-filter">
+                        <option value="all">Все типы</option>
+                        <option value="receipt">Приход</option>
+                        <option value="dispatch">Расход</option>
+                        <option value="inventory">Инвентаризация</option>
+                    </select>
+                </div>
+                <div class="table-container">
+                <table>
+                    <thead><tr><th>Дата/время</th><th>Товар</th><th>Тип</th><th>Штук</th><th>Паллет</th><th>Комментарий</th><th>Пользователь</th></tr></thead>
+                    <tbody id="history-tbody">
+            `;
+            ops.forEach(op => {
+                const typeName = {receipt:'📥 Приход', dispatch:'📤 Расход', inventory:'🔍 Инвент'}[op.type] || op.type;
+                html += `<tr class="history-row" data-goodname="${op.goodName.toLowerCase()}" data-type="${op.type}">
+                    <td>${new Date(op.date).toLocaleString()}</td>
+                    <td>${escapeHtml(op.goodName)}</td>
+                    <td>${typeName}</td>
+                    <td>${op.quantity}</td>
+                    <td>${op.pallets}</td>
+                    <td>${escapeHtml(op.comment || '')}</td>
+                    <td>${escapeHtml(op.user)}</td>
+                </tr>`;
+            });
+            html += `</tbody></table></div>`;
+            container.innerHTML = html;
+
+            const filterInput = document.getElementById('history-filter');
+            const typeFilter = document.getElementById('history-type-filter');
+            if (filterInput && typeFilter) {
+                const filterRows = () => {
+                    const text = filterInput.value.toLowerCase();
+                    const type = typeFilter.value;
+                    document.querySelectorAll('.history-row').forEach(row => {
+                        const goodName = row.dataset.goodname;
+                        const rowType = row.dataset.type;
+                        const matchText = goodName.includes(text);
+                        const matchType = type === 'all' || rowType === type;
+                        row.style.display = matchText && matchType ? '' : 'none';
+                    });
+                };
+                filterInput.addEventListener('input', filterRows);
+                typeFilter.addEventListener('change', filterRows);
+            }
+        }
+
+        // ---------- Остатки с выбором склада ----------
+        function renderBalances(container) {
+            const warehouses = getWarehouses();
+            let html = `
+                <h2 style="color:#8b4ec7;">Остатки</h2>
+                <div class="warehouse-selector">
+                    <label for="balance-warehouse">Выберите склад: </label>
+                    <select id="balance-warehouse" style="padding:10px; border-radius:30px; border:2px solid #d9b3ff; min-width:250px;">
+                        <option value="ALL">Все склады</option>
+                        ${warehouses.map(w => `<option value="${w}">${w}</option>`).join('')}
+                    </select>
+                </div>
+                <div id="balance-display"></div>
+            `;
+            container.innerHTML = html;
+
+            function showBalancesForWarehouse(warehouse) {
+                const display = document.getElementById('balance-display');
+                let stockData = [];
+                if (warehouse === 'ALL') {
+                    const allGoodsMap = new Map();
+                    warehouses.forEach(wh => {
+                        const goods = getGoods(wh);
+                        const stock = getStock(wh);
+                        stock.forEach(s => {
+                            const good = goods.find(g => g.id === s.goodId);
+                            if (!good) return;
+                            if (!allGoodsMap.has(s.goodId)) {
+                                allGoodsMap.set(s.goodId, { name: good.name, quantity: 0, pallets: 0 });
+                            }
+                            const item = allGoodsMap.get(s.goodId);
+                            item.quantity += s.quantity;
+                            item.pallets += s.pallets;
+                        });
+                    });
+                    stockData = Array.from(allGoodsMap.entries()).map(([id, val]) => ({ goodId: id, ...val }));
+                } else {
+                    const goods = getGoods(warehouse);
+                    const stock = getStock(warehouse);
+                    stockData = stock.map(s => {
+                        const good = goods.find(g => g.id === s.goodId);
+                        return {
+                            goodId: s.goodId,
+                            name: good ? good.name : 'Неизвестный товар',
+                            quantity: s.quantity,
+                            pallets: s.pallets
+                        };
+                    }).sort((a,b) => a.name.localeCompare(b.name));
+                }
+
+                let tableHtml = `
+                    <table>
+                        <thead><tr><th>Наименование</th><th>Штук</th><th>Паллет</th></tr></thead>
+                        <tbody>
+                `;
+                stockData.forEach(item => {
+                    tableHtml += `<tr><td>${escapeHtml(item.name)}</td><td>${item.quantity}</td><td>${item.pallets}</td></tr>`;
+                });
+                tableHtml += `</tbody></table>`;
+                display.innerHTML = tableHtml;
+            }
+
+            const selector = document.getElementById('balance-warehouse');
+            selector.addEventListener('change', () => showBalancesForWarehouse(selector.value));
+            showBalancesForWarehouse('ALL');
+        }
+
+        // ---------- Заявки (только для админа) ----------
+        function renderRequests(container) {
+            if (!isAdmin) {
+                container.innerHTML = '<div class="message">Доступ запрещён</div>';
                 return;
-              }
-              e.preventDefault();
-              document.querySelector(`.tab-btn[data-tab="${tab}"]`).click();
             }
-          }
+            const requests = getRequests().filter(r => !r.approved && !r.rejected);
+            let html = `
+                <h2 style="color:#8b4ec7;">Заявки на регистрацию</h2>
+                <div class="requests-panel">
+            `;
+            if (requests.length === 0) {
+                html += '<p>Нет новых заявок</p>';
+            } else {
+                requests.forEach(req => {
+                    html += `
+                        <div class="request-item">
+                            <span><strong>${escapeHtml(req.warehouse)}</strong> хочет пароль: ${escapeHtml(req.password)} (${new Date(req.date).toLocaleString()})</span>
+                            <div>
+                                <button class="btn-small btn-success" onclick="approveRequestHandler('${req.id}')">✅ Одобрить</button>
+                                <button class="btn-small btn-danger" onclick="rejectRequestHandler('${req.id}')">❌ Отклонить</button>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+            html += `</div>
+            <h2 style="color:#8b4ec7; margin-top:30px;">Управление паролями</h2>
+            <div class="requests-panel">
+                <p>Сбросить пароль пользователя (после сброса пользователь сможет запросить новый):</p>
+                <select id="reset-warehouse-select">
+                    ${getWarehouses().map(w => `<option value="${w}">${w}</option>`).join('')}
+                </select>
+                <button class="btn" id="reset-password-btn">Сбросить пароль</button>
+            </div>
+            `;
+            container.innerHTML = html;
+
+            // Обработчики для кнопок одобрения/отклонения должны быть глобальными
+            window.approveRequestHandler = function(requestId) {
+                approveRequest(requestId);
+                renderRequests(container);
+            };
+            window.rejectRequestHandler = function(requestId) {
+                rejectRequest(requestId);
+                renderRequests(container);
+            };
+
+            document.getElementById('reset-password-btn')?.addEventListener('click', () => {
+                const warehouse = document.getElementById('reset-warehouse-select').value;
+                resetUserPassword(warehouse);
+                alert(`Пароль для склада ${warehouse} сброшен.`);
+                renderRequests(container);
+            });
+        }
+
+        // ---------- Утилиты ----------
+        function escapeHtml(unsafe) {
+            if (!unsafe) return '';
+            return unsafe.replace(/[&<>"]/g, function(m) {
+                if (m === '&') return '&amp;';
+                if (m === '<') return '&lt;';
+                if (m === '>') return '&gt;';
+                if (m === '"') return '&quot;';
+                return m;
+            });
+        }
+
+        function showMessage(elementId, text, type) {
+            const msg = document.getElementById(elementId);
+            if (msg) {
+                msg.style.display = 'block';
+                msg.textContent = text;
+                msg.className = 'message ' + (type === 'error' ? 'error' : 'success');
+                setTimeout(() => msg.style.display = 'none', 3000);
+            }
+        }
+
+        // ---------- Вход в систему ----------
+        function login(warehouse, password) {
+            if (!warehouse || !password) {
+                alert('ПУ-ПУ-ПУ');
+                return false;
+            }
+            const result = tryLogin(warehouse, password);
+            if (result.success) {
+                currentWarehouse = warehouse;
+                currentUserPassword = password;
+                isAdmin = result.isAdmin || false;
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('main-app').style.display = 'block';
+                document.getElementById('current-warehouse-label').textContent = warehouse;
+                ensureDemoGoods(warehouse);
+                // Добавляем вкладку "Заявки" для админа
+                const tabsContainer = document.getElementById('tabs-container');
+                if (isAdmin && !document.querySelector('.tab[data-tab="requests"]')) {
+                    const reqTab = document.createElement('button');
+                    reqTab.className = 'tab';
+                    reqTab.dataset.tab = 'requests';
+                    reqTab.textContent = '📬 Заявки';
+                    tabsContainer.appendChild(reqTab);
+                    reqTab.addEventListener('click', () => switchTab('requests'));
+                } else if (!isAdmin) {
+                    // Удаляем вкладку заявок, если она есть (на случай перелогина)
+                    const reqTab = document.querySelector('.tab[data-tab="requests"]');
+                    if (reqTab) reqTab.remove();
+                }
+                switchTab('catalog');
+                updateNotificationBell();
+                return true;
+            } else {
+                alert(result.message || 'Ошибка входа');
+                return false;
+            }
+        }
+
+        function logout() {
+            currentWarehouse = null;
+            currentUserPassword = '';
+            isAdmin = false;
+            document.getElementById('login-screen').style.display = 'block';
+            document.getElementById('main-app').style.display = 'none';
+            renderWarehouseSelect();
+            // Удаляем вкладку заявок
+            const reqTab = document.querySelector('.tab[data-tab="requests"]');
+            if (reqTab) reqTab.remove();
+        }
+
+        // ---------- Инициализация после загрузки ----------
+        window.addEventListener('DOMContentLoaded', () => {
+            renderWarehouseSelect();
+
+            document.getElementById('login-btn').addEventListener('click', () => {
+                const warehouse = document.getElementById('warehouse-select').value;
+                const password = document.getElementById('password-input').value.trim();
+                login(warehouse, password);
+            });
+
+            document.getElementById('add-warehouse-btn').addEventListener('click', () => {
+                const name = prompt('Введите название нового склада:');
+                if (!name) return;
+                if (addWarehouse(name)) {
+                    renderWarehouseSelect();
+                } else {
+                    alert('ПУ-ПУ-ПУ');
+                }
+            });
+
+            document.getElementById('remove-warehouse-btn').addEventListener('click', () => {
+                const warehouses = getWarehouses();
+                if (warehouses.length === 0) return alert('Нет складов');
+                const name = prompt('Введите название склада для удаления (внимание, данные будут потеряны!):\n' + warehouses.join(', '));
+                if (!name) return;
+                if (confirm(`Точно удалить склад ${name}?`)) {
+                    if (removeWarehouse(name)) {
+                        renderWarehouseSelect();
+                    } else {
+                        alert('ПУ-ПУ-ПУ');
+                    }
+                }
+            });
+
+            document.getElementById('logout-btn').addEventListener('click', logout);
+
+            // Колокольчик показывает заявки (только для админа)
+            document.getElementById('notification-bell').addEventListener('click', () => {
+                if (isAdmin) {
+                    switchTab('requests');
+                } else {
+                    alert('Нет новых уведомлений');
+                }
+            });
+
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const tabId = tab.dataset.tab;
+                    switchTab(tabId);
+                });
+            });
+
+            updateNotificationBell();
         });
-      }
     })();
-  </script>
+</script>
 </body>
 </html>
